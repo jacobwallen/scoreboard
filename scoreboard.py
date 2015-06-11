@@ -3,7 +3,7 @@
 
 from datetime import datetime
 import random
-
+import re
 
 init_run = False
 
@@ -178,25 +178,55 @@ def report_score():
     global contest_scores
     cls()
     show_pilots()
-    pilot_id = int(raw_input("Pilot ID: "))
+    pilot_id = raw_input("Pilot ID: (abort) ")
+    if pilot_id is "":
+        return
+    else:
+        pilot_id = int(pilot_id)
     pilot = pilots[pilot_id - 1]
-    rnumber = raw_input("Round: ")
+    valid = range(0, base_rounds + 1)
+    rnumber = -1
+    while int(rnumber) not in valid:
+        rnumber = raw_input("Round: ")
+    if rnumber is "":
+        rnumber = -1
+    else:
+        rnumber = int(rnumber)
     print "%s Round %s:" % (pilot, rnumber)
 
     valid = range(0, 7)
-    minutes = 99
+    minutes = -1
     while int(minutes) not in valid:
-        minutes = int(raw_input("Minutes: "))
+        minutes = raw_input("Minutes: ")
+        if minutes is "":
+            minutes = 0
+        elif re.match(r"\d+", minutes):
+            minutes = int(minutes)
+        else:
+            minutes = -1
 
     valid = range(0, 60)
-    seconds = 99
+    seconds = -1
     while int(seconds) not in valid:
-        seconds = int(raw_input("Seconds: "))
+        seconds = raw_input("Minutes: ")
+        if seconds is "":
+            seconds = 0
+        elif re.match(r"\d+", seconds):
+            seconds = int(seconds)
+        else:
+            seconds = -1
 
-    cuts = int(raw_input("How Many Cuts? "))
-    streamer = bool(raw_input("Streamer OK? "))
-    non_eng = bool(raw_input("Non-Engagement? "))
-    safety = bool(raw_input("Safety?"))
+    cuts = raw_input("How Many Cuts? ")
+    if cuts is "":
+        cuts = 0
+    elif re.match(r"\d+", cuts):
+        cuts = int(cuts)
+    else:
+        cuts = 0
+
+    streamer = bool(raw_input("Streamer OK? (no) "))
+    non_eng = bool(raw_input("Non-Engagement? (no) "))
+    safety = bool(raw_input("Safety? (no) "))
 
     roundscore = [pilot, rnumber, minutes, seconds, cuts, streamer,
                   non_eng, safety]
@@ -208,9 +238,19 @@ def report_score():
 
 
 def print_contest_scores():
-    global contest_scores
     cls()
+    global contest_scores
     print contest_scores
+    seen = set()
+    repeated = set()
+    for _list in contest_scores:
+        for i in set(_list):
+            if i in seen:
+                repeated.add(i)
+            else:
+                seen.add(i)
+    print repeated
+    print seen
     any_key()
 
 
@@ -257,7 +297,7 @@ def randomize_heats():
 #    global base_rounds
     if len(startlists) > 0:
         answ = raw_input(" Warning startlists already made, "
-                         "generate new overwriting old? (y)")
+                         "generate new overwriting old? (yes)")
         if answ is "y":
             startlists = []
             rounds = []
